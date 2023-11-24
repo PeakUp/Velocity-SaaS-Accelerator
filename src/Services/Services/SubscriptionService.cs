@@ -153,6 +153,12 @@ public class SubscriptionService
             existingPlanDetail = this.planRepository.GetById(subscription.AmpplanId);
         }
 
+        // If subscription is not activated, StartDate and EndDate have min values. 
+        // For some reason they are not null. When min date value is converted to DateTimeOffset it throws an error about time offset and year value.
+        // So we are manually converting to DatetimeOffset
+        DateTimeOffset startDate = subscription.StartDate.HasValue && subscription.StartDate.Value != DateTime.MinValue ? subscription.StartDate.Value : DateTimeOffset.MinValue;
+        DateTimeOffset endDate = subscription.EndDate.HasValue && subscription.EndDate.Value != DateTime.MinValue ? subscription.EndDate.Value: DateTimeOffset.MinValue;
+
         SubscriptionResultExtension subscritpionDetail = new SubscriptionResultExtension
         {
             Id = subscription.AmpsubscriptionId,
@@ -161,8 +167,8 @@ public class SubscriptionService
             OfferId = subscription.AmpOfferId,
             Term = new TermResult
             {
-                StartDate = subscription.StartDate.GetValueOrDefault(),
-                EndDate = subscription.EndDate.GetValueOrDefault(),
+                StartDate = startDate,
+                EndDate = endDate,
             },
             Quantity = subscription.Ampquantity,
             Name = subscription.Name,
